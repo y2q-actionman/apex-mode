@@ -35,6 +35,7 @@
 ;;   (require 'apex-mode)
 
 (require 'font-lock)
+(require 'cc-mode)
 
 (defvar apex-mode-hook nil)
 
@@ -45,51 +46,72 @@
   "Keymap for Apex major mode")
 
 (add-to-list 'auto-mode-alist '("\\.cls\\'" . apex-mode))
+(add-to-list 'auto-mode-alist '("\\.trigger\\'" . apex-mode))
 
 (defconst apex-font-lock-keywords
-  `((,(regexp-opt
-       '("public" "global" "private" "protected" "static" "final" "transient" "virtual" "override" "abstract"
-	 "class" "interface" "new" "enum" "implements" "extends" "instanceof"
-         "if" "then" "else" "do" "while" "break" "continue"
-	 "try" "catch" "throw" "finally"
-	 "trigger" "on" "before" "after"
-	 "return"
-	 "testmethod" "future" "callout"
-	 "select" "from" "using" "where" "not" "or" "null" "void" "true" "false" "like" "as" "in"
-	 )
-       'words)
-     (1 font-lock-keyword-face))
-    
-    (,(concat
-       (regexp-opt
-        '("insert" "update" "upsert" "delete" "undelete" "merge"
+  (append
+   `((,(regexp-opt
+	;; TODO: remove duplicated keywords
+   	'("public" "global" "private" "protected" "static" "final" "transient" "virtual" "override" "abstract"
+   	  "class" "interface" "new" "enum" "implements" "extends" "instanceof"
+   	  "if" "then" "else" "do" "while" "break" "continue"
+   	  "try" "catch" "throw" "finally"
+   	  "trigger" "on" "before" "after"
+   	  "return"
+   	  "testMethod" "future" "callout"
+	  ;; TODO: use regexps for detecting SOQL range
+   	  "select" "from" "using" "where" "not" "or" "null" "void" "true" "false" "like" "as" "in"
+   	  )
+   	'words)
+      . font-lock-keyword-face)
+
+     ;; TODO: add regexps for detecting DML
+     
+     ;; (,(concat
+     ;;    (regexp-opt
+     ;;     '("insert" "update" "upsert" "delete" "undelete" "merge"
+     ;;  	  "find" "search" "returning" "fields" "phrase"
+     ;;  	  )
+     ;; 	'words)
+     ;;    "(")
+     ;;  (1 font-lock-function-name-face))
+     (,(regexp-opt
+	'("insert" "update" "upsert" "delete" "undelete" "merge"
 	  "find" "search" "returning" "fields" "phrase"
 	  )
-        'words)
-       "(")
-     (1 font-lock-function-name-face))
-    
-    ("\\<\\([0-9]+[lL]\\|\\([0-9]+\\.?[0-9]*\\|\\.[0-9]+\\)\\([eE][-+]?[0-9]+\\)?[fF]?\\)\\>"
-     . font-lock-constant-face)
-    ;; should "null" be here?
-    
-    ("\\<$[0-9]+\\>" . font-lock-variable-name-face)
+	'words)
+      . font-lock-function-name-face)
 
-    (,(regexp-opt
-       '("list" "set" "map"
-	 "Blob" "Boolean" "Date" "Datetime" "Decimal" "Double" "ID" "Integer" "Long" "String" "Time"
-	 )
-       'words)
-     (1 font-lock-type-face)))
+     ;; TODO: add regexps for test annotations
+     
+     
+     ;; FIXME: I think these are duplicated with java-mode...
+    
+     ;; ("\\<\\([0-9]+[lL]\\|\\([0-9]+\\.?[0-9]*\\|\\.[0-9]+\\)\\([eE][-+]?[0-9]+\\)?[fF]?\\)\\>"
+     ;;  . font-lock-constant-face)
+     ;; ;; should "null" be here?
+    
+     ;; ("\\<$[0-9]+\\>" . font-lock-variable-name-face)
+
+     ;; (,(regexp-opt
+     ;;    '("list" "set" "map"
+     ;; 	 "Blob" "Boolean" "Date" "Datetime" "Decimal" "Double" "ID" "Integer" "Long" "String" "Time"
+     ;; 	 )
+     ;;    'words)
+     ;;  (1 font-lock-type-face))
+     )
+   java-font-lock-keywords-3)
   "regexps to highlight in apex mode")
 
 (defvar apex-mode-syntax-table
-  (let ((st (make-syntax-table)))
-    (modify-syntax-entry ?\/  ". 12b"  st) ;; C-style "// ..."
-    (modify-syntax-entry ?\n  "> b"    st)
-;; define comment for this style: "/* ... */" 
-    (modify-syntax-entry ?\/ ". 14" st)
-    (modify-syntax-entry ?*  ". 23"   st)
+  (let ((st (make-syntax-table java-mode-syntax-table)))
+    ;; FIXME: I think these are duplicated with java-mode...
+    
+;;     (modify-syntax-entry ?\/  ". 12b"  st) ;; C-style "// ..."
+;;     (modify-syntax-entry ?\n  "> b"    st)
+;; ;; define comment for this style: "/* ... */" 
+;;     (modify-syntax-entry ?\/ ". 14" st)
+;;     (modify-syntax-entry ?*  ". 23"   st)
     st)
   "Syntax table for apex mode")
 
@@ -107,7 +129,8 @@ For detail, see `comment-dwim'."
   :syntax-table apex-mode-syntax-table
   (define-key apex-mode-map [remap comment-dwim] 'apex-comment-dwim)
 
-  (set (make-local-variable 'font-lock-defaults) '(apex-font-lock-keywords nil t))
+  (set (make-local-variable 'indent-tabs-mode) nil)
+  (set (make-local-variable 'font-lock-defaults) '(apex-font-lock-keywords nil nil))
   )
 
 (provide 'apex-mode)
