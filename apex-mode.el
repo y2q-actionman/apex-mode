@@ -45,6 +45,7 @@
     keymap)
   "Keymap for Apex major mode")
 
+(add-to-list 'auto-mode-alist '("\\.page\\'" . html-mode)) ; (2017-8-7 added)
 (add-to-list 'auto-mode-alist '("\\.cls\\'" . apex-mode))
 (add-to-list 'auto-mode-alist '("\\.trigger\\'" . apex-mode))
 
