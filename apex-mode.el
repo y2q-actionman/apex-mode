@@ -116,6 +116,15 @@
     st)
   "Syntax table for apex mode")
 
+(defun apex-supress-warning-single-quotes-advice (orig-fun &rest args)
+  (if (eql major-mode 'apex-mode)
+      nil
+    (apply orig-fun args)))
+
+(advice-add 'c-font-lock-invalid-single-quotes :around
+	    #'apex-supress-warning-single-quotes-advice)
+
+
 ;; the command to comment/uncomment text
 (defun apex-comment-dwim (arg)
 "Comment or uncomment current line or region in a smart way.
